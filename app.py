@@ -21,13 +21,17 @@ st.set_page_config(
 def fetch_data_from_nextcloud():
     """Récupère les données depuis le serveur Nextcloud (Excel ou CSV)"""
 
-    # Récupération des identifiants depuis les variables d'environnement ou secrets Streamlit
-    if 'NEXTCLOUD_USER' in st.secrets:
-        username = st.secrets['NEXTCLOUD_USER']
-        password = st.secrets['NEXTCLOUD_PASSWORD']
-    else:
-        username = os.getenv('NEXTCLOUD_USER')
-        password = os.getenv('NEXTCLOUD_PASSWORD')
+    # Récupération des identifiants - d'abord les variables d'environnement, puis les secrets Streamlit
+    username = os.getenv('NEXTCLOUD_USER')
+    password = os.getenv('NEXTCLOUD_PASSWORD')
+
+    # Si pas trouvé dans les variables d'environnement, essayer les secrets Streamlit
+    if not username or not password:
+        try:
+            username = st.secrets.get('NEXTCLOUD_USER', username)
+            password = st.secrets.get('NEXTCLOUD_PASSWORD', password)
+        except:
+            # Si les secrets Streamlit ne sont pas disponibles, continuer avec les variables d'env
 
     if not username or not password:
         st.error("⚠️ Identifiants Nextcloud manquants. Vérifiez vos variables d'environnement ou secrets Streamlit.")
